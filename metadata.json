@@ -1,0 +1,5 @@
+{
+  "name": "MikartCam",
+  "description": "Real-time webcam effects using WebGL with 85 different filters, photo capture, and video recording.",
+  "requestFramePermissions": ["camera", "microphone", "geolocation"]
+}
