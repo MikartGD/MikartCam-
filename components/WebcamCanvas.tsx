@@ -226,7 +226,23 @@ const WebcamCanvas = forwardRef<WebcamCanvasRef, Props>(({ onRecordingChange, fa
         canvasStream.addTrack(audioTracks[0]);
       }
 
-      const options = { mimeType: 'video/webm; codecs=vp9' };
+      let mimeType = '';
+      let extension = 'mp4';
+
+      if (typeof MediaRecorder !== 'undefined') {
+        if (MediaRecorder.isTypeSupported('video/mp4')) {
+          mimeType = 'video/mp4';
+          extension = 'mp4';
+        } else if (MediaRecorder.isTypeSupported('video/webm; codecs=vp9')) {
+          mimeType = 'video/webm; codecs=vp9';
+          extension = 'webm';
+        } else if (MediaRecorder.isTypeSupported('video/webm')) {
+          mimeType = 'video/webm';
+          extension = 'webm';
+        }
+      }
+
+      const options = mimeType ? { mimeType } : {};
       let recorder: MediaRecorder;
       try {
         recorder = new MediaRecorder(canvasStream, options);
@@ -241,12 +257,12 @@ const WebcamCanvas = forwardRef<WebcamCanvasRef, Props>(({ onRecordingChange, fa
       };
 
       recorder.onstop = () => {
-        const blob = new Blob(recordedChunksRef.current, { type: recorder.mimeType });
+        const blob = new Blob(recordedChunksRef.current, { type: recorder.mimeType || mimeType || 'video/mp4' });
         recordedChunksRef.current = [];
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = `fx-video-${Date.now()}.webm`;
+        link.download = `fx-video-${Date.now()}.${extension}`;
         link.click();
         URL.revokeObjectURL(url);
       };
